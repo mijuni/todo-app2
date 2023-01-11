@@ -3,42 +3,67 @@ const btnElement = document.querySelector("#btn-new-todo");
 const formElement = document.querySelector("form");
 const todoListElement = document.querySelector("#todo-list");
 const btnDeleteElement = document.querySelector("#delete-all-done");
+
 let stateArr = [];
 
-// Funktion um Todo API zu laden
+// fetch API with URL
 function loadTodos() {
   fetch("http://localhost:4730/todos")
     .then((response) => response.json())
     .then((data) => {
-      //console.log(data);
-      //Todos anzeigen - Fetch API benutzt GET Methode by default
+      //show todos - GET request by default
       stateArr = data;
+      console.log(stateArr);
       showTodos();
     });
 }
 
-// Funktion um Todos anzuzeigen (rendering)
+//Sicherheitsabfrage einbauen
+/*
+if(respond.ok) {
+return response.json()
+} else {
+  console.log("That was not sucessful.")
+}
+*/
+
+// function to show todos (rendering)
 function showTodos() {
   todoListElement.innerHTML = "";
   stateArr.forEach((todo) => {
-    const newLi = document.createElement("li");
-    const text = document.createTextNode(todo.description);
-    newLi.appendChild(text);
+    // create checkbox element
+    const checkboxElement = document.createElement("input");
+    checkboxElement.type = "checkbox";
+    checkboxElement.id = todo.id;
+    // checkbox.checked = done:true
+    checkboxElement.checked = todo.done;
 
+    //create list element
+    const newLi = document.createElement("li");
+
+    // create todo text
+    const text = document.createTextNode(todo.description);
+
+    // append text and checkbox elements to list element
+    newLi.append(text, checkboxElement);
+    // append li element to ul
     todoListElement.appendChild(newLi);
+
+    // add Eventhandler for checkbox element
+    checkboxElement.addEventListener("change", updateTodo);
   });
 }
 
-// Neues Todo anlegen mit Backend
+// create new todo with API
+// POST request - object with data is sent to backend
 btnElement.addEventListener("click", () => {
   const newTodoText = newTodoInputElement.value;
-  // Objekt bauen dass ans Backend geschickt wird
+  // build object to send data to API
   const newTodo = {
     description: newTodoText,
     done: false,
   };
 
-  //Objekt ans Backend schicken mit POST Methode
   fetch("http://localhost:4730/todos", {
     method: "POST",
     headers: {
@@ -48,45 +73,55 @@ btnElement.addEventListener("click", () => {
   })
     .then((res) => res.json())
     .then((newTodoFromApi) => {
-      // nicht optimal wenn mutli-device
-      stateArr.push(newTodoFromApi);
-      showTodos();
-      // Alternative wäre wenn man nur loadTodos() ausführt - somit wird kompletter State geladen
+      // not best use for mutli-device
+      /* stateArr.push(newTodoFromApi);
+      showTodos(); */
+      loadTodos();
+      // alternative: to execute only loadTodos() - hence complete state will be loaded
     });
 });
 
-// DELETE Methode um erledigte Todos zu löschen - mit state checked/ done
-/*
-btnDeleteElement.addEventlistener("click" () => {
-  fetch("http://localhost:4730/todos", {
-    method: "DELETE"
+// function to update todo status to done
+// PUT request - update todos by id(event.target.id)
+function updateTodo(event) {
+  const id = event.target.id;
+  const updatedTodo = {
+    // event target = checkbox, parentNode = li element, innerText = innerText from li element
+    description: event.target.parentNode.innerText,
+    done: event.target.checked,
+  };
+
+  fetch("http://localhost:4730/todos/" + id, {
+    method: "PUT",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(updatedTodo),
   })
     .then((res) => res.json())
-    .then(() => {
-
-  });
-});
-*/
-
-// PUT Methode um bestehendes Todo upzudaten - muss nach state checked erfolgen
-/*
-const updatedTodo = {
-  id: welches Todo man updaten möchte,
-  description: "Beschreibung des Todos",
-  done: true
+    .then((updatedTodoFromApi) => {
+      loadTodos();
+    });
 }
-fetch("http://localhost:4730/todos", {
-  method: "PUT",
-  headers: {
-    "content-type": "application/json",
-  },
-  body: JSON.stringify(updatedTodo),
-})
-.then ((res) => res.json())
-.then((updatedToDoFromApi) => {
-  stateArr.push(updatedToDoFromApi);
-  showTodos();
-});
-*/
+
+// Eventhandler when button is clicked delete todo
+btnDeleteElement.addEventListener("click", deleteTodo);
+
+// function to delete todo from API
+// DELETE request - delete done todos(done:true) by id(todo.id)
+function deleteTodo() {
+  stateArr.forEach((todo) => {
+    const todoId = todo.id;
+    if (todo.done) {
+      fetch("http://localhost:4730/todos/" + todoId, {
+        method: "DELETE",
+      })
+        .then((res) => res.json())
+        .then((newTodoFromApi) => {
+          loadTodos();
+        });
+    }
+  });
+}
 
 loadTodos();
