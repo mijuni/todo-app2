@@ -5,34 +5,40 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
     <title>To Do App 2</title>
 
 </head>
 
 <body>
-    <form>
-        <input type="text" id="new-todo" />
-        <button id="btn-new-todo" type="submit">Add</button>
-        <button id="delete-all-done" type="button">Delete done todos</button>
-    </form>
-    <!--
-    <section class="filter">
+    <header>
+        <div class="clock">
+            <div id="hour">00</div>
+            <span>:</span>
+            <div id="minute">00</div>
+            <span>:</span>
+            <div id="seconds">00</div>
+        </div>
+        <h1>Hey, you.</h1>
+    </header>
+    <main>
+        <div class="container">
+            <form>
+                <div class="searchbar">
+                    <input type="text" id="new-todo" placeholder="What do you need to do?" />
+                </div>
 
-        <input type="radio" id="all-todos" name="todo" checked>
-        <label for="all-todos">All</label>
-
-        <input type="radio" id="open-todos" name="todo">
-        <label for="open-todos">Open</label>
-
-        <input type="radio" id="done-todos" name="todo">
-        <label for="done-todos">Done</label>
-
-    </section>
-    -->
-    <section>
-        <h1>Todos</h1>
-        <ul id="todo-list"></ul>
-    </section>
+                <div class="btns">
+                    <button id="btn-new-todo" type="submit">Add</button>
+                    <button id="delete-all-done" type="button">Delete done todos</button>
+                </div>
+            </form>
+            <section>
+                <h2>Todos</h2>
+                <ul id="todo-list"></ul>
+            </section>
+        </div>
+    </main>
     <script src="script.js"></script>
 </body>
 

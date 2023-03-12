@@ -4,28 +4,21 @@ const formElement = document.querySelector("form");
 const todoListElement = document.querySelector("#todo-list");
 const btnDeleteElement = document.querySelector("#delete-all-done");
 
+const apiUrl = "http://localhost:4730/todos";
+
 let stateArr = [];
 
 // fetch API with URL
-function loadTodos() {
-  fetch("http://localhost:4730/todos")
-    .then((response) => response.json())
-    .then((data) => {
-      //show todos - GET request by default
-      stateArr = data;
-      console.log(stateArr);
-      showTodos();
-    });
+async function loadTodos() {
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    stateArr = data;
+    showTodos();
+  } catch (error) {
+    console.error(error);
+  }
 }
-
-//Sicherheitsabfrage einbauen
-/*
-if(respond.ok) {
-return response.json()
-} else {
-  console.log("That was not sucessful.")
-}
-*/
 
 // function to show todos (rendering)
 function showTodos() {
@@ -64,7 +57,7 @@ btnElement.addEventListener("click", () => {
     done: false,
   };
 
-  fetch("http://localhost:4730/todos", {
+  fetch(apiUrl, {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -91,7 +84,7 @@ function updateTodo(event) {
     done: event.target.checked,
   };
 
-  fetch("http://localhost:4730/todos/" + id, {
+  fetch(apiUrl + "/" + id, {
     method: "PUT",
     headers: {
       "content-type": "application/json",
@@ -113,11 +106,11 @@ function deleteTodo() {
   stateArr.forEach((todo) => {
     const todoId = todo.id;
     if (todo.done) {
-      fetch("http://localhost:4730/todos/" + todoId, {
+      fetch(apiUrl + "/" + todoId, {
         method: "DELETE",
       })
         .then((res) => res.json())
-        .then((newTodoFromApi) => {
+        .then((deletedTodoFromApi) => {
           loadTodos();
         });
     }
@@ -125,3 +118,30 @@ function deleteTodo() {
 }
 
 loadTodos();
+
+/*======================= Clock =======================*/
+
+let hour = document.querySelector("#hour");
+let minute = document.querySelector("#minute");
+let seconds = document.querySelector("#seconds");
+
+let clock = setInterval(function time() {
+  let dateNow = new Date();
+  let hourNow = dateNow.getHours();
+  let minNow = dateNow.getMinutes();
+  let secNow = dateNow.getSeconds();
+
+  if (hourNow < 10) {
+    hourNow = "0" + hourNow;
+  }
+  if (minNow < 10) {
+    minNow = "0" + minNow;
+  }
+  if (secNow < 10) {
+    secNow = "0" + secNow;
+  }
+
+  hour.innerText = hourNow;
+  minute.innerText = minNow;
+  seconds.innerText = secNow;
+}, 1000);
